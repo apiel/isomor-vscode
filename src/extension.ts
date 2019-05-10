@@ -32,19 +32,42 @@ function isIsomorProject(options: any) { // need to export options
 	return promisify(exists)(options.srcFolder);
 }
 
+function warnEditSrc(document: vscode.TextDocument, options: any) {
+	const warnFile = document.fileName.replace(new RegExp(`^${options.distAppFolder}${sep}`), '');
+	if (warnFile !== document.fileName) {
+		vscode.window.showWarningMessage(
+			'Dev folder is src-isomor. This folder will be automatically updated by transpiler.',
+			options.srcFolder,
+		);
+	}
+}
+
+async function transpileFile(document: vscode.TextDocument, options: any, outputChannel: vscode.OutputChannel) {
+	const file = document.fileName.replace(new RegExp(`^${options.srcFolder}${sep}`), '');
+	if (file !== document.fileName) {
+		console.log('File saved, transpile file', file);
+		outputChannel.appendLine(`File saved, transpile file ${file}`);
+		await watcherUpdate(options)(file);
+	}
+}
+
+async function buildAll(document: vscode.TextDocument, outputChannel: vscode.OutputChannel) {
+	const rootFolder = await getRootFolder(document);
+	if (rootFolder) {
+		const options = loadOptions(rootFolder);
+		await build(options);
+		vscode.window.showInformationMessage('isomor build all done', rootFolder);
+		outputChannel.appendLine(`Build all done ${rootFolder}`);
+	}
+}
+
 export function activate(context: vscode.ExtensionContext) {
 	console.log('Congratulations, your extension "isomor-vscode" is now active!');
 	const outputChannel = vscode.window.createOutputChannel('isomor');
 
 	let disposable = vscode.commands.registerCommand('extension.isomorBuildAll', async () => {
 		if (vscode.window.activeTextEditor) {
-			const rootFolder = await getRootFolder(vscode.window.activeTextEditor.document);
-			if (rootFolder) {
-				const options = loadOptions(rootFolder);
-				await build(options);
-				vscode.window.showInformationMessage('isomor build all done', rootFolder);
-				outputChannel.appendLine(`Build all done ${rootFolder}`);
-			}
+			await buildAll(vscode.window.activeTextEditor.document, outputChannel);
 		}
 	});
 
@@ -55,22 +78,8 @@ export function activate(context: vscode.ExtensionContext) {
 		if (rootFolder) {
 			const options = loadOptions(rootFolder);
 			if (await isIsomorProject(options)) {
-				const file = document.fileName.replace(new RegExp(`^${options.srcFolder}${sep}`), '');
-				if (file !== document.fileName) {
-					console.log('File saved, transpile file', file);
-					outputChannel.appendLine(`File saved, transpile file ${file}`);
-					watcherUpdate(options)(file);
-				} else {
-					console.log('No need to update file', file);
-				}
-
-				const warnFile = document.fileName.replace(new RegExp(`^${options.distAppFolder}${sep}`), '');
-				if (warnFile !== document.fileName) {
-					vscode.window.showWarningMessage(
-						'Dev folder is src-isomor. This folder will be automatically updated by transpiler.',
-						options.srcFolder,
-					);
-				}
+				await transpileFile(document, options, outputChannel);
+				warnEditSrc(document, options);
 			}
 		}
 	});
