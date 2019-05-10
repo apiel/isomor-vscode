@@ -4,7 +4,7 @@ import {
 	getOptions,
 	watcherUpdate,
 } from 'isomor-transpiler';
-import { dirname, join } from 'path';
+import { dirname, join, sep } from 'path';
 
 const baseOptions = getOptions();
 
@@ -26,9 +26,13 @@ export function activate(context: vscode.ExtensionContext) {
 				srcFolder: join(rootFolder, baseOptions.srcFolder),
 				distAppFolder: join(rootFolder, baseOptions.distAppFolder),
 			};
-			// vscode.window.showInformationMessage('opt', JSON.stringify(options));
-			const file = document.fileName.replace(rootFolder, '');
-			vscode.window.showInformationMessage('File saved', file);
+			const file = document.fileName.replace(new RegExp(`^${options.srcFolder}${sep}`), '');
+			if (file !== document.fileName) {
+				console.log('File saved, update file', file);
+				watcherUpdate(options)(file);
+			} else {
+				console.log('No need to update file', file);
+			}
 		}
 	});
 }
