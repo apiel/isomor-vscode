@@ -28,6 +28,7 @@ function loadOptions(rootFolder: string) {
 
 export function activate(context: vscode.ExtensionContext) {
 	console.log('Congratulations, your extension "isomor-vscode" is now active!');
+	const outputChannel = vscode.window.createOutputChannel('isomor');
 
 	let disposable = vscode.commands.registerCommand('extension.isomorBuildAll', async () => {
 		if (vscode.window.activeTextEditor) {
@@ -36,6 +37,7 @@ export function activate(context: vscode.ExtensionContext) {
 				const options = loadOptions(rootFolder);
 				await build(options);
 				vscode.window.showInformationMessage('isomor build all done', rootFolder);
+				outputChannel.appendLine(`Build all done ${rootFolder}`);
 			}
 		}
 	});
@@ -48,7 +50,8 @@ export function activate(context: vscode.ExtensionContext) {
 			const options = loadOptions(rootFolder);
 			const file = document.fileName.replace(new RegExp(`^${options.srcFolder}${sep}`), '');
 			if (file !== document.fileName) {
-				console.log('File saved, update file', file);
+				console.log('File saved, transpile file', file);
+				outputChannel.appendLine(`File saved, transpile file ${file}`);
 				watcherUpdate(options)(file);
 			} else {
 				console.log('No need to update file', file);
