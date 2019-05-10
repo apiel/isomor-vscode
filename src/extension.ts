@@ -6,6 +6,8 @@ import {
 	watcherUpdate,
 } from 'isomor-transpiler';
 import { dirname, join, sep } from 'path';
+import { exists } from 'fs';
+import { promisify } from 'util';
 
 const baseOptions = getOptions();
 
@@ -24,6 +26,10 @@ function loadOptions(rootFolder: string) {
 		distAppFolder: join(rootFolder, baseOptions.distAppFolder),
 	};
 	return options;
+}
+
+function isIsomorProject(options: any) { // need to export options
+	return promisify(exists)(options.srcFolder);
 }
 
 export function activate(context: vscode.ExtensionContext) {
@@ -48,13 +54,23 @@ export function activate(context: vscode.ExtensionContext) {
 		const rootFolder = await getRootFolder(document);
 		if (rootFolder) {
 			const options = loadOptions(rootFolder);
-			const file = document.fileName.replace(new RegExp(`^${options.srcFolder}${sep}`), '');
-			if (file !== document.fileName) {
-				console.log('File saved, transpile file', file);
-				outputChannel.appendLine(`File saved, transpile file ${file}`);
-				watcherUpdate(options)(file);
-			} else {
-				console.log('No need to update file', file);
+			if (await isIsomorProject(options)) {
+				const file = document.fileName.replace(new RegExp(`^${options.srcFolder}${sep}`), '');
+				if (file !== document.fileName) {
+					console.log('File saved, transpile file', file);
+					outputChannel.appendLine(`File saved, transpile file ${file}`);
+					watcherUpdate(options)(file);
+				} else {
+					console.log('No need to update file', file);
+				}
+
+				const warnFile = document.fileName.replace(new RegExp(`^${options.distAppFolder}${sep}`), '');
+				if (warnFile !== document.fileName) {
+					vscode.window.showWarningMessage(
+						'Dev folder is src-isomor. This folder will be automatically updated by transpiler.',
+						options.srcFolder,
+					);
+				}
 			}
 		}
 	});
