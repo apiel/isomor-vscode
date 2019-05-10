@@ -36,8 +36,7 @@ function warnEditSrc(document: vscode.TextDocument, options: any) {
 	const warnFile = document.fileName.replace(new RegExp(`^${options.distAppFolder}${sep}`), '');
 	if (warnFile !== document.fileName) {
 		vscode.window.showWarningMessage(
-			'Dev folder is src-isomor. This folder will be automatically updated by transpiler.',
-			options.srcFolder,
+			'Folder will be overwritten by isomor. Edit "./src-isomor" instead.',
 		);
 	}
 }
