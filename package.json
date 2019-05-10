@@ -17,7 +17,7 @@
 		"commands": [
 			{
 				"command": "extension.isomorBuildAll",
-				"title": "isomor build"
+				"title": "isomor build all"
 			}
 		]
 	},

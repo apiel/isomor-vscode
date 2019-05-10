@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 import * as pkgUp from 'pkg-up';
 import {
+	build,
 	getOptions,
 	watcherUpdate,
 } from 'isomor-transpiler';
@@ -8,24 +9,43 @@ import { dirname, join, sep } from 'path';
 
 const baseOptions = getOptions();
 
+async function getRootFolder(document: vscode.TextDocument) {
+	const pkg = await pkgUp({ cwd: document.fileName });
+	if (pkg) {
+		const rootFolder = dirname(pkg);
+		return rootFolder;
+	}
+}
+
+function loadOptions(rootFolder: string) {
+	const options = {
+		...baseOptions,
+		srcFolder: join(rootFolder, baseOptions.srcFolder),
+		distAppFolder: join(rootFolder, baseOptions.distAppFolder),
+	};
+	return options;
+}
+
 export function activate(context: vscode.ExtensionContext) {
 	console.log('Congratulations, your extension "isomor-vscode" is now active!');
 
-	let disposable = vscode.commands.registerCommand('extension.isomorBuildAll', () => {
-		vscode.window.showInformationMessage('isomor re-build all');
+	let disposable = vscode.commands.registerCommand('extension.isomorBuildAll', async () => {
+		if (vscode.window.activeTextEditor) {
+			const rootFolder = await getRootFolder(vscode.window.activeTextEditor.document);
+			if (rootFolder) {
+				const options = loadOptions(rootFolder);
+				await build(options);
+				vscode.window.showInformationMessage('isomor build all done', rootFolder);
+			}
+		}
 	});
 
 	context.subscriptions.push(disposable);
 
 	vscode.workspace.onDidSaveTextDocument(async (document: vscode.TextDocument) => {
-		const pkg = await pkgUp({ cwd: document.fileName });
-		if (pkg) {
-			const rootFolder = dirname(pkg);
-			const options = {
-				...baseOptions,
-				srcFolder: join(rootFolder, baseOptions.srcFolder),
-				distAppFolder: join(rootFolder, baseOptions.distAppFolder),
-			};
+		const rootFolder = await getRootFolder(document);
+		if (rootFolder) {
+			const options = loadOptions(rootFolder);
 			const file = document.fileName.replace(new RegExp(`^${options.srcFolder}${sep}`), '');
 			if (file !== document.fileName) {
 				console.log('File saved, update file', file);
