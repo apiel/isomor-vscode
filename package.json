@@ -3,7 +3,7 @@
 	"displayName": "isomor",
 	"description": "Extension to use isomor.",
 	"publisher": "apiel",
-	"version": "0.0.3",
+	"version": "0.0.5",
 	"homepage": "https://apiel.github.io/isomor/",
 	"keywords": [
 		"isomorphic",
@@ -81,7 +81,7 @@
 	"dependencies": {
 		"@babel/core": "^7.4.4",
 		"@babel/plugin-syntax-typescript": "^7.3.3",
-		"isomor-transpiler": "^0.9.3",
+		"isomor-transpiler": "^0.9.6",
 		"logol": "^0.0.3",
 		"pkg-up": "^3.1.0"
 	}

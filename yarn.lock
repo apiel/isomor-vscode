@@ -1294,9 +1294,9 @@ isomor-core@^0.9.0:
     glob "^7.1.3"
     typescript "^3.2.4"
 
-isomor-transpiler@^0.9.3:
-  version "0.9.5"
-  resolved "https://registry.yarnpkg.com/isomor-transpiler/-/isomor-transpiler-0.9.5.tgz#899e628ed2167b817bbca15dfde302adab147ac1"
+isomor-transpiler@^0.9.6:
+  version "0.9.6"
+  resolved "https://registry.yarnpkg.com/isomor-transpiler/-/isomor-transpiler-0.9.6.tgz#f8aa6f6351a99e9b3c46db56d9693fb0400305cf"
   dependencies:
     "@babel/generator" "^7.4.0"
     "@babel/parser" "^7.4.4"
