@@ -32,7 +32,32 @@
 				"command": "extension.isomorBuildAll",
 				"title": "isomor build all"
 			}
-		]
+		],
+        "languages": [
+            {
+                "id": "Log",
+                "aliases": [
+                    "log"
+                ],
+                "extensions": [
+                    ".log"
+                ],
+                "mimetypes": [
+                    "log",
+                    "text/log",
+                    "text/x-log",
+                    "text/x-code-output",
+                    "x-code-output"
+                ]
+            }
+        ],
+        "grammars": [
+            {
+                "language": "Log",
+                "scopeName": "code.log",
+                "path": "./src/syntaxes/log.tmLanguage"
+            }
+        ]
 	},
 	"scripts": {
 		"pub": "npx vsce publish",
