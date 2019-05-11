@@ -8,6 +8,7 @@ import {
 import { dirname, join, sep } from 'path';
 import { exists } from 'fs';
 import { promisify } from 'util';
+import { logol } from 'logol';
 
 const baseOptions = getOptions();
 
@@ -60,9 +61,24 @@ async function buildAll(document: vscode.TextDocument, outputChannel: vscode.Out
 	}
 }
 
+function redirectLogsToOutputChannel(outputChannel: vscode.OutputChannel) {
+	if (logol && logol.log) {
+		const output = (...params: any[]) => {
+			const value = params.map(param => param.toString()).join(' ');
+			outputChannel.appendLine(value);
+		};
+		logol.log = output;
+		logol.info = output;
+		logol.debug = output;
+		logol.warn = output;
+		logol.error = output;
+	}
+}
+
 export function activate(context: vscode.ExtensionContext) {
 	console.log('Congratulations, your extension "isomor-vscode" is now active!');
 	const outputChannel = vscode.window.createOutputChannel('isomor');
+	redirectLogsToOutputChannel(outputChannel);
 
 	let disposable = vscode.commands.registerCommand('extension.isomorBuildAll', async () => {
 		if (vscode.window.activeTextEditor) {
